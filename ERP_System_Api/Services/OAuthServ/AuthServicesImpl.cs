@@ -15,96 +15,44 @@ namespace ERP_System_Api.Services.OAuthServ
     public class AuthServicesImpl : IAuthServices<UserRequest>
     {
         private readonly IConfiguration _configuration;
-        private readonly UserManager<UserRequest> _userManager;
+        
 
 
-        public AuthServicesImpl(IConfiguration config, UserManager<UserRequest> userManager)
+        public AuthServicesImpl(IConfiguration config)
         {
             _configuration = config;
-            _userManager = userManager;
+           
 
         }
 
         public async Task<AuthResult> CreateUsers(UserRequest request)
         {
-            try
-            {
-                var newUser = await _userManager.FindByNameAsync(request.UserName);
-                if (newUser == null)
-                {
+            throw new NotImplementedException();
 
-                }
-                var createUser = await _userManager.CreateAsync(newUser, request.Password);
-                if (!createUser.Succeeded)
-                {
-
-                }
-
-                var result = CreateToken(newUser);
-
-                return result;
-
-            }
-
-            catch (Exception)
-            {
-
-                throw;
-            }
-
-            
         }
 
         public string GetUserName(string username)
         {
-            try
-            {
-                var user =  _userManager.FindByNameAsync(username);
-                if(user == null)
-                {
-
-                }
-
-                return user.ToString(); 
-               
-
-            }
-
-            catch (Exception)
-            {
-
-                throw;
-            }
+            throw new NotImplementedException();
             
         }
 
         public async Task<AuthResult> SignIn(UserRequest request)
         {
-            try
-            {
-                var existUser = await _userManager.FindByNameAsync(request.UserName);
-                if (existUser == null)
-                {
 
-                }
-                var userValidate = await _userManager.CheckPasswordAsync(existUser, request.Password);
-                if (!userValidate)
-                {
-
-                }
-                var result = CreateToken(existUser);
-
-                return result;
-
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
+            throw new NotImplementedException();
         }
 
+        public Task<ErrorResult> create(string name)
+        {
+            var resp = new ErrorResult
+            {
+                Message = name
+            };
 
+            return Task.FromResult(resp);
+
+        }
 
 
 

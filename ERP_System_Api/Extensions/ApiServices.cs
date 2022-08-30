@@ -12,7 +12,7 @@ namespace ERP_System_Api
         {
 
             //Dependecy Injection Services Methods
-            services.AddScoped<IAuthServices<UserRequest>, AuthServicesImpl>();
+            services.AddScoped<ICreate, IPruebaImp>();
             //services.AddTransient<ICrudServices>();
 
 

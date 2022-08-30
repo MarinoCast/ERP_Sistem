@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using ERP_System_Api.Payloads.Request;
+using ERP_System_Api.Services.OAuthServ;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -11,6 +14,7 @@ namespace ERP_System_Api.Controllers
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase
     {
+        private readonly ICreate _prueba;
         private static readonly string[] Summaries = new[]
         {
             "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
@@ -18,12 +22,13 @@ namespace ERP_System_Api.Controllers
 
         private readonly ILogger<WeatherForecastController> _logger;
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
+        public WeatherForecastController(ILogger<WeatherForecastController> logger, ICreate prueba)
         {
             _logger = logger;
+            _prueba = prueba;
         }
 
-        [HttpGet]
+        [HttpGet("GetWeatherForecast"), Authorize(Roles = "Admin, Owner")]
         public IEnumerable<WeatherForecast> Get()
         {
             var rng = new Random();
@@ -34,6 +39,13 @@ namespace ERP_System_Api.Controllers
                 Summary = Summaries[rng.Next(Summaries.Length)]
             })
             .ToArray();
+        }
+        [HttpGet("/prueba")]
+        public async Task<ActionResult<string>> GetName(string name)
+        {
+            var respo = _prueba.create(name);
+
+            return Ok(respo);
         }
 
     }

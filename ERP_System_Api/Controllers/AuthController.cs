@@ -2,59 +2,49 @@
 using ERP_System_Api.Payloads.Request;
 using ERP_System_Api.Services.OAuthServ;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Cryptography;
 
 namespace ERP_System_Api.Controllers
 {
     public class AuthController : BaseApiController
     {
-        public readonly IAuthServices<UserRequest> _authServices;
+       
 
-        public AuthController(IAuthServices<UserRequest> authServices)
+        public AuthController()
         {
-            _authServices = authServices;
+          
         }
 
         [HttpPost("/SignUp")]
         public async Task<IActionResult> Register([FromBody] UserRequest request)
         {
-            try
-            {
-                var response = await _authServices.CreateUsers(request);
-                if (!response.Success)
-                {
-                   // Manejo de excepciones
-                }
-                return Ok(response);
-            }
-            catch (Exception)
-            {
+            throw new NotImplementedException();
 
-                throw;
-            }
-           
         }
         [HttpPost("/SingIn")]
         public  async Task<IActionResult> Login([FromBody] UserRequest request)
         {
-            try
-            {
-                var response = await _authServices.SignIn(request);
-                if (!ModelState.IsValid)
-                {
-                    ModelState.Values.SelectMany(x => x.Errors.Select(xx => xx.ErrorMessage));
-                }
-                if (!ModelState.IsValid)
-                {
-                    ModelState.Values.SelectMany(x => x.Errors.Select(xx => xx.ErrorMessage));
+            throw new NotImplementedException();
+        }
 
-                }
-                return Ok(response);
+
+
+        private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
+        {
+            using (var hmac = new HMACSHA512())
+            {
+                passwordSalt = hmac.Key;
+                passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
             }
-            catch (Exception)
-            {
+        }
 
-                throw;
-            } 
+        private bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
+        {
+            using (var hmac = new HMACSHA512(passwordSalt))
+            {
+                var computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+                return computedHash.SequenceEqual(passwordHash);
+            }
         }
     }
 }

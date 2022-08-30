@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.Filters;
 using System.Collections.Generic;
 using System.Text;
 
@@ -15,53 +16,28 @@ namespace ERP_System_Api
         {
             services.AddSwaggerGen(x =>
             {
-                x.SwaggerDoc("v0", new Info { Title = "ERP_System_Api", Version = "Version 0.1" });
-
-                var Security = new Dictionary<string, IEnumerable<string>>
-                    {
-                        {"Authorization", new string[0]}
-                    };
-
-
-                x.AddSecurityDefinition("OAuth2", new OpenApiSecurityScheme()
+                x.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
                 {
-                    Description = "Jwt Authorization header using the Bearer scheme (\"bearer {token}\")",
-                    Name = "Authorization",
+                    Description = "Standard Authorization header using the Bearer scheme (\"bearer {token}\")",
                     In = ParameterLocation.Header,
-                    Type = SecuritySchemeType.ApiKey,
-
-
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.ApiKey
                 });
 
-                x.AddSecurityRequirement(new OpenApiSecurityRequirement
-                    {
-                        {new OpenApiSecurityScheme{Reference = new OpenApiReference
-                        {
-                            Id = "Bearer",
-                            Type = ReferenceType.SecurityScheme
-                    }},
-                            new string[] {}
-                        }
-                    });
+                x.OperationFilter<SecurityRequirementsOperationFilter>();
             });
-
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
+           services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(x =>
                 {
-                    options.TokenValidationParameters = new TokenValidationParameters
+                    x.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuerSigningKey = true,
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8
-                        .GetBytes(configuration.GetSection("JwtAuth:Token").Value)),
+                            .GetBytes(configuration.GetSection("JwtAuth:Token").Value)),
                         ValidateIssuer = false,
                         ValidateAudience = false
                     };
                 });
-            services.AddCors(options => options.AddPolicy(name: "NgOrigins",
-            policy =>
-            {
-                policy.WithOrigins("https://localhost:44359/").AllowAnyMethod().AllowAnyHeader();
-            }));
 
         }
     }
