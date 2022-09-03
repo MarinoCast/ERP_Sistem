@@ -1,4 +1,5 @@
 using ERP_System_Api;
+using ERP_System_Api.Helpers.JwtHelpers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
@@ -32,14 +33,24 @@ if (app.Environment.IsDevelopment())
 // specifying the Swagger JSON endpoint.
 
 
+var swaggerOptions = new SwaggerOptions();
+builder.Configuration.GetSection(nameof(SwaggerOptions)).Bind(swaggerOptions);
+
+app.UseSwagger(option => { option.RouteTemplate = swaggerOptions.JsonRoute; });
+
+app.UseSwaggerUI(option =>
+{
+    option.SwaggerEndpoint(swaggerOptions.UIEndpoint, swaggerOptions.Description);
+});
 
 
 app.UseCors("NgOrigins");
 
 app.UseHttpsRedirection();
 
-app.UseAuthorization();
 app.UseAuthentication();
+app.UseAuthorization();
+
 
 app.MapControllers();
 

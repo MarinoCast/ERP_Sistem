@@ -1,50 +1,92 @@
 ﻿using ERP_System_Api.Controllers.BaseController;
+using ERP_System_Api.Helpers;
+using ERP_System_Api.Model;
 using ERP_System_Api.Payloads.Request;
 using ERP_System_Api.Services.OAuthServ;
 using Microsoft.AspNetCore.Mvc;
+using OwlHR.Payloads.Response;
 using System.Security.Cryptography;
 
 namespace ERP_System_Api.Controllers
 {
-    public class AuthController : BaseApiController
+    [ApiController]
+    [Route("[api/controller]")]
+    public class AuthController : ControllerBase
     {
-       
+        private readonly IAuthServices _autServices;
+        private readonly IUserAuthService _userAuthService;
 
-        public AuthController()
+        public AuthController(IAuthServices authServices, IUserAuthService userAuthService)
         {
-          
+            _autServices = authServices;
+            _userAuthService = userAuthService;
         }
 
         [HttpPost("/SignUp")]
-        public async Task<IActionResult> Register([FromBody] UserRequest request)
+        public async Task<IActionResult> Register([FromBody] UserAuth userAuth)
         {
-            throw new NotImplementedException();
+            var AuthResponse = await _userAuthService.RegisterAsync(userAuth.Email, userAuth.UserName, userAuth.Password);
 
+            if (!AuthResponse.Success)
+            {
+                return BadRequest(new FailAuthResponse
+                {
+                   
+                });
+            }
+
+            return Ok(new AuthSuccessResponse
+            {
+                Email = AuthResponse.UserName,
+                Token = AuthResponse.Token,
+            });
         }
+        //[HttpPost("/Register-Admin")]
+        //public async Task<IActionResult> RegisterAdmin([FromBody] UserRequest request)
+        //{
+        //    var response = await _autServices.RegisterAdmin(request);
+        //    if (response == null)
+        //    {
+        //        throw new Exception("Error en la solicitud");
+        //    }
+        //    return Ok(response);
+        //}
         [HttpPost("/SingIn")]
-        public  async Task<IActionResult> Login([FromBody] UserRequest request)
+        public async Task<IActionResult> Login([FromBody] UserAuth userAuth)
         {
-            throw new NotImplementedException();
-        }
+            var AuthResponse = await _userAuthService.LoginAsync(userAuth.Email, userAuth.Password);
 
-
-
-        private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
-        {
-            using (var hmac = new HMACSHA512())
+            if (!ModelState.IsValid)
             {
-                passwordSalt = hmac.Key;
-                passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+                ModelState.Values.SelectMany(x => x.Errors.Select(xx => xx.ErrorMessage));
+
             }
+            if (!AuthResponse.Success)
+            {
+                return BadRequest(new FailAuthResponse
+                {
+                });
+            }
+
+
+            return Ok(new AuthSuccessResponse
+            {
+                Email = AuthResponse.UserName,
+                Token = AuthResponse.Token,
+               
+            });
+
+
+
         }
 
-        private bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
+        [HttpGet("/LogOut")]
+        public async Task<IActionResult> Logout()
         {
-            using (var hmac = new HMACSHA512(passwordSalt))
-            {
-                var computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
-                return computedHash.SequenceEqual(passwordHash);
-            }
+            var response = await _autServices.Logout();
+
+            return Ok(response);
         }
+
     }
 }

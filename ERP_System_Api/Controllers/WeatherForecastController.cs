@@ -14,7 +14,6 @@ namespace ERP_System_Api.Controllers
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase
     {
-        private readonly ICreate _prueba;
         private static readonly string[] Summaries = new[]
         {
             "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
@@ -22,10 +21,10 @@ namespace ERP_System_Api.Controllers
 
         private readonly ILogger<WeatherForecastController> _logger;
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger, ICreate prueba)
+        public WeatherForecastController(ILogger<WeatherForecastController> logger)
         {
             _logger = logger;
-            _prueba = prueba;
+           
         }
 
         [HttpGet("GetWeatherForecast"), Authorize(Roles = "Admin, Owner")]
@@ -40,13 +39,7 @@ namespace ERP_System_Api.Controllers
             })
             .ToArray();
         }
-        [HttpGet("/prueba")]
-        public async Task<ActionResult<string>> GetName(string name)
-        {
-            var respo = _prueba.create(name);
-
-            return Ok(respo);
-        }
+       
 
     }
 }
