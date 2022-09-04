@@ -30,10 +30,7 @@ namespace ERP_System_Api
                 op.Password.RequiredLength = 6;
                 op.Password.RequiredUniqueChars = 0;
 
-                // Lockout settings.
-                op.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
-                op.Lockout.MaxFailedAccessAttempts = 5;
-                op.Lockout.AllowedForNewUsers = true;
+                
 
                 // User settings.
                 op.User.AllowedUserNameCharacters =

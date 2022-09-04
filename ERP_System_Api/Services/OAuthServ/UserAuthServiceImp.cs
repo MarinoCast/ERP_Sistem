@@ -14,14 +14,15 @@ namespace ERP_System_Api.Services.OAuthServ
     public class UserAuthServiceImp : IUserAuthService
     {
         private readonly UserManager<IdentityUser> userMgr;
-        private readonly TokenValidationParameters tokenParams;
+        private readonly IConfiguration config;
+
         private readonly RoleManager<IdentityRole> rolMgr;
 
-        public UserAuthServiceImp(UserManager<IdentityUser> userManager, TokenValidationParameters tokenValidationParameters, RoleManager<IdentityRole> roleManager)
+        public UserAuthServiceImp(IConfiguration configuration, UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager)
         {
             userMgr = userManager;
-            tokenParams = tokenValidationParameters;
             rolMgr = roleManager;
+            config = configuration;
 
         }
         //<---------------------Login/Request Methods-------------------------->
@@ -141,81 +142,36 @@ namespace ERP_System_Api.Services.OAuthServ
 
         //<---------------------JWT Token Methods-------------------------->
 
-        //public async Task<AuthResult> RefreshTokenAsync(string Token, string refreshToken)
-        //{
+       
 
-        //    var validatedToken = getPrincipalToken(Token);
-
-        //    if(validatedToken == null)
-        //    {
-        //    }
-        //    var exiryDateUnix = long.Parse(validatedToken.Claims.Single(x => x.Type == JwtRegisteredClaimNames.Exp).Value);
-
-        //    var expiryDateTimeUtc = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)
-        //        .AddSeconds(exiryDateUnix);
-
-
-        //    if(expiryDateTimeUtc > DateTime.UtcNow)
-        //    {
-        //    }
-
-        //    var jti = validatedToken.Claims.Single(x => x.Type == JwtRegisteredClaimNames.Jti).Value;
-
-        //    var storeRefreshToken =  _context.RefershTokens.SingleOrDefault(x => x.Token == refreshToken);
-
-        //    if (storeRefreshToken == null)
-        //    {
-        //        return new AuthResult { Errors = new[] { "This token hasn't expired yet" } };
-        //    }
-        //    if(DateTime.UtcNow > storeRefreshToken.ExpiryDate)
-        //    {
-        //        return new AuthResult { Errors = new[] { "This refresh token has expired" } };
-
-        //    }
-        //    if (storeRefreshToken.Invalidated)
-        //    {
-        //        return new AuthResult { Errors = new[] { "This refresh token has been invalidated" } };
-        //    }
-        //    if (storeRefreshToken.Used)
-        //    {
-        //        return new AuthResult { Errors = new[] { "This refresh token has been used" } };
-        //    }
-        //    if(storeRefreshToken.JwtId != jti)
-        //    {
-        //        return new AuthResult { Errors = new[] { "This refresh token doesn't match this Jwt" } };
-        //    }
-        //    storeRefreshToken.Used = true;
-        //    _context.RefershTokens.Update(storeRefreshToken);
-        //    await _context.SaveChangesAsync();
-
-        //    var user = await userMgr.FindByIdAsync(validatedToken.Claims.Single(x => x.Type == "id").Value);
-        //    return CreateToken(user);
-
-        //}
-
-
-        private static AuthResult CreateToken(IdentityUser newUser)
+        public AuthResult CreateToken(IdentityUser newUser)
         {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes("JwtSettings:Secret");
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(new[]
-                {
-                    new Claim(ClaimTypes.Name, newUser.UserName),
-                    new Claim(ClaimTypes.Email, newUser.Email),
-
-                    new Claim("id", newUser.Id)
-                }),
-                Expires = DateTime.UtcNow.AddHours(3),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-            };
-            var token = tokenHandler.CreateToken(tokenDescriptor);
             
+
+            var authClaims = new List<Claim>
+            {
+             new Claim(ClaimTypes.Name, newUser.UserName),
+             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
+          var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(
+               config.GetSection("JwtAuth:Token").Value));
+
+            var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+
+            var token = new JwtSecurityToken
+            (
+                claims: authClaims,
+                expires: DateTime.Now.AddDays(1),
+                signingCredentials: cred
+            );
+            var jwt = new JwtSecurityTokenHandler().WriteToken(token);
+
+
+
             return new AuthResult
             {
                 UserName = newUser.UserName,
-                Token = tokenHandler.WriteToken(token),
+                Token = jwt,
                 Success = true,
                 
             };

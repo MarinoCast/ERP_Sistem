@@ -37,7 +37,7 @@ namespace ERP_System_Api.Controllers
 
             return Ok(new AuthSuccessResponse
             {
-                Email = AuthResponse.UserName,
+                UserName = AuthResponse.UserName,
                 Token = AuthResponse.Token,
             });
         }
@@ -71,7 +71,7 @@ namespace ERP_System_Api.Controllers
 
             return Ok(new AuthSuccessResponse
             {
-                Email = AuthResponse.UserName,
+                UserName = AuthResponse.UserName,
                 Token = AuthResponse.Token,
                
             });

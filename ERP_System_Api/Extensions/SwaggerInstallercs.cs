@@ -18,64 +18,30 @@ namespace ERP_System_Api
     {
         public void InstallerServices(IServiceCollection services, IConfiguration configuration)
         {
-           // configure strongly typed settings object
-            services.Configure<JwtSettings>(configuration.GetSection("JwtAuth"));
-
-            // configure DI for application services
-           
-            var key = Encoding.ASCII.GetBytes("JwtAuth:Token");
-            var jwtSettings = new JwtSettings();
-            configuration.Bind(nameof(jwtSettings), jwtSettings);
-            services.AddSingleton(jwtSettings);
-
-            var tokenValidationParameters = new TokenValidationParameters
-            {
-
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(key),
-                ValidateAudience = false,
-                ValidateIssuer = false,
-                RequireExpirationTime = false,
-                ValidateLifetime = true
-
-            };
-
-            services.AddSingleton(tokenValidationParameters);
-
-            services.AddAuthentication(x =>
-            {
-                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                x.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-              .AddJwtBearer(x =>
-              {
-
-                  x.SaveToken = true;
-                  x.TokenValidationParameters = tokenValidationParameters;
-              });
-
             services.AddSwaggerGen(x =>
             {
-
-                x.AddSecurityDefinition(name: "Bearer", new OpenApiSecurityScheme()
+                x.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
                 {
-                    Description = "JWT Authorization header using the bearer scheme",
-                    Name = "Authorization",
+                    Description = "Standard Authorization header using the Bearer scheme (\"bearer {token}\")",
                     In = ParameterLocation.Header,
-                    Type = SecuritySchemeType.ApiKey,
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.ApiKey
                 });
-                //    x.AddSecurityRequirement(new OpenApiSecurityRequirement
-                //        {
-                //            {new OpenApiSecurityScheme{Reference = new OpenApiReference
-                //            {
-                //                Id = "Bearer",
-                //                Type = ReferenceType.SecurityScheme
-                //        }},
-                //                new string[] {}
-                //            }
-                //        });
+
+                x.OperationFilter<SecurityRequirementsOperationFilter>();
             });
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                 .AddJwtBearer(x =>
+                 {
+                     x.TokenValidationParameters = new TokenValidationParameters
+                     {
+                         ValidateIssuerSigningKey = true,
+                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8
+                             .GetBytes(configuration.GetSection("JwtAuth:Token").Value)),
+                         ValidateIssuer = false,
+                         ValidateAudience = false
+                     };
+                 });
 
 
         }

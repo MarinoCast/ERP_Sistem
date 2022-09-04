@@ -101,7 +101,7 @@ namespace ERP_System_Api.Services.OAuthServ
         //    }
         //    //Asignacion de datos del usuario
         //    user.UserName = request.UserName;
-        //    user.Email = request.Email;
+        //    user.UserName = request.UserName;
         //    user.Password = request.Password;
         //    //Creacion del Usuario
         //    var createUser = await userMgr.CreateAsync(userExist, user.Password);

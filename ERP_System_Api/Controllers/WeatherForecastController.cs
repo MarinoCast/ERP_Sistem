@@ -1,4 +1,5 @@
-﻿using ERP_System_Api.Payloads.Request;
+﻿using ERP_System_Api.Controllers.BaseController;
+using ERP_System_Api.Payloads.Request;
 using ERP_System_Api.Services.OAuthServ;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,7 +13,7 @@ namespace ERP_System_Api.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class WeatherForecastController : ControllerBase
+    public class WeatherForecastController : BaseApiController
     {
         private static readonly string[] Summaries = new[]
         {
@@ -27,7 +28,7 @@ namespace ERP_System_Api.Controllers
            
         }
 
-        [HttpGet("GetWeatherForecast"), Authorize(Roles = "Admin, Owner")]
+        [HttpGet("GetWeatherForecast")]
         public IEnumerable<WeatherForecast> Get()
         {
             var rng = new Random();
