@@ -1,5 +1,9 @@
 ﻿using ERP_System_Api.Controllers;
+using ERP_System_Api.DataBase;
+using ERP_System_Api.Helpers.JwtHelpers;
+using ERP_System_Api.Model;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
@@ -26,18 +30,19 @@ namespace ERP_System_Api
 
                 x.OperationFilter<SecurityRequirementsOperationFilter>();
             });
-           services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(x =>
-                {
-                    x.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8
-                            .GetBytes(configuration.GetSection("JwtAuth:Token").Value)),
-                        ValidateIssuer = false,
-                        ValidateAudience = false
-                    };
-                });
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                 .AddJwtBearer(x =>
+                 {
+                     x.TokenValidationParameters = new TokenValidationParameters
+                     {
+                         ValidateIssuerSigningKey = true,
+                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8
+                             .GetBytes(configuration.GetSection("JwtAuth:Token").Value)),
+                         ValidateIssuer = false,
+                         ValidateAudience = false
+                     };
+                 });
+
 
         }
     }
