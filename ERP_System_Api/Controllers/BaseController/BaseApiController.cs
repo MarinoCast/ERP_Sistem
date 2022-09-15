@@ -6,8 +6,8 @@ namespace ERP_System_Api.Controllers.BaseController
 {
     [ApiController]
     [Route("[api/controller]")]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class BaseApiController : ControllerBase
     {
        
