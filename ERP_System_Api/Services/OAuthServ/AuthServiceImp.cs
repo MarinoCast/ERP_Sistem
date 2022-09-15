@@ -11,14 +11,13 @@ using System.Threading.Tasks;
 
 namespace ERP_System_Api.Services.OAuthServ
 {
-    public class UserAuthServiceImp : IUserAuthService
+    public class AuthServiceImp : IAuthService
     {
         private readonly UserManager<IdentityUser> userMgr;
         private readonly IConfiguration config;
-
         private readonly RoleManager<IdentityRole> rolMgr;
 
-        public UserAuthServiceImp(IConfiguration configuration, UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager)
+        public AuthServiceImp(IConfiguration configuration, UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager)
         {
             userMgr = userManager;
             rolMgr = roleManager;
@@ -26,31 +25,34 @@ namespace ERP_System_Api.Services.OAuthServ
 
         }
         //<---------------------Login/Request Methods-------------------------->
-        public async Task<AuthResult> LoginAsync(string email, string password)
+        public async Task<AuthResult> LoginAsync(string username, string password)
         {
-            var User = await userMgr.FindByEmailAsync(email);
+            var User = await userMgr.FindByNameAsync(username);
 
             if (User == null)
             {
-                
+                throw new Exception("Usuario/Contraseña incorrecta");
             }
 
             var userValidate = await userMgr.CheckPasswordAsync(User, password);
             if (!userValidate)
             {
-             
+                throw new Exception("Contraseña incorrecta");
             }
-            var Authorize = CreateToken(User);
-            return Authorize;
+            var Authorize = CreateTokenAsync(User);
+            return await Authorize;
         }
 
         public async Task<AuthResult> RegisterAsync(string email, string username,string password)
         {
+
+
             var existingUser = await userMgr.FindByEmailAsync(email);
 
             if (existingUser != null)
             {
-               
+                throw new Exception("Usuario/Contraseña incorrecta");
+
             }
             var newUser = new IdentityUser
             {
@@ -62,13 +64,18 @@ namespace ERP_System_Api.Services.OAuthServ
             var createUser = await userMgr.CreateAsync(newUser, password);
 
             if (!createUser.Succeeded)
-            {
-              
+            { 
+                throw new Exception("Usuario invalido/ Su nombre   ");
+
             }
-            var Authorize = CreateToken(newUser);
-            return Authorize;
+            var Authorize = CreateTokenAsync(newUser);
+            return await Authorize;
         }
 
+        public async Task<AuthResult> LogOut()
+        {
+            return null;
+        }
 
 
 
@@ -78,7 +85,7 @@ namespace ERP_System_Api.Services.OAuthServ
         public async Task<AuthResult> RegisterAdmin(UserAuth request)
         {
             var userExist = await userMgr.FindByNameAsync(request.UserName);
-            if (userExist != null)
+            if (userExist == null)
             {
                 throw new Exception("Usuario no encontrado!");
             }
@@ -86,18 +93,18 @@ namespace ERP_System_Api.Services.OAuthServ
             var user = new IdentityUser
             {
                 UserName = request.UserName,
-                Email = request.Email
+                
 
             };
-            
+
             //Creacion del Usuario
-            var createUser = await userMgr.CreateAsync(userExist, request.Password);
+            var createUser = await userMgr.UpdateAsync(userExist);
             if (!createUser.Succeeded)
             {
                 throw new Exception("Error en la conexion! Espere unos momentos");
             }
             //Crecion y Asignacion de Roles
-            if (!await rolMgr.RoleExistsAsync(UserRoles.Admin))
+            if (!await rolMgr.RoleExistsAsync(UserRoles.Admin)) // Si el rol no existe creara el rol
             {
                 await rolMgr.CreateAsync(new IdentityRole(UserRoles.Admin));
             }
@@ -114,11 +121,11 @@ namespace ERP_System_Api.Services.OAuthServ
             {
                 await userMgr.AddToRoleAsync(userExist, UserRoles.Admin);
             }
-            if (!await rolMgr.RoleExistsAsync(UserRoles.Admin))
+            if (await rolMgr.RoleExistsAsync(UserRoles.Admin))
             {
                 await userMgr.AddToRoleAsync(userExist, UserRoles.Employee);
             }
-            if (!await rolMgr.RoleExistsAsync(UserRoles.Admin))
+            if (await rolMgr.RoleExistsAsync(UserRoles.Admin))
             {
                 await userMgr.AddToRoleAsync(userExist, UserRoles.Owner);
             }
@@ -126,26 +133,18 @@ namespace ERP_System_Api.Services.OAuthServ
             return new AuthResult
             {
                 Success = true,
-                Message = "Usuario Creados Sactifactoriamente!"
+                Message = "Roles Creados Sactifactoriamente!"
 
             };
         }
-
-
-
-
-
-
-
-
-
 
         //<---------------------JWT Token Methods-------------------------->
 
        
 
-        public AuthResult CreateToken(IdentityUser newUser)
+        public async Task<AuthResult> CreateTokenAsync(IdentityUser newUser)
         {
+            var userRoles = await userMgr.GetRolesAsync(newUser);
             
 
             var authClaims = new List<Claim>
@@ -153,10 +152,17 @@ namespace ERP_System_Api.Services.OAuthServ
              new Claim(ClaimTypes.Name, newUser.UserName),
              new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
+            foreach (var userRole in userRoles)
+            {
+                authClaims.Add(new Claim(ClaimTypes.Role, userRole));
+            }
+
+           
           var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(
                config.GetSection("JwtAuth:Token").Value));
 
             var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+
 
             var token = new JwtSecurityToken
             (
@@ -164,9 +170,10 @@ namespace ERP_System_Api.Services.OAuthServ
                 expires: DateTime.Now.AddDays(1),
                 signingCredentials: cred
             );
+
             var jwt = new JwtSecurityTokenHandler().WriteToken(token);
 
-
+            authClaims.Add(new Claim(ClaimTypes.Authentication, jwt));
 
             return new AuthResult
             {

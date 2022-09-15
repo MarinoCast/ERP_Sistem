@@ -13,8 +13,7 @@ namespace ERP_System_Api
 
 
             
-            services.AddTransient<IAuthServices,AuthServicesImpl>();
-            services.AddTransient<IUserAuthService, UserAuthServiceImp>();
+            services.AddTransient<IAuthService, AuthServiceImp>();
 
 
 

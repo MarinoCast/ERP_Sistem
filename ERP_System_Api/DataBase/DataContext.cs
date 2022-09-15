@@ -12,7 +12,7 @@ namespace ERP_System_Api.DataBase
         {
 
         }
-
+        public DbSet<Test> Test { get; set; }
 
     }
 }
