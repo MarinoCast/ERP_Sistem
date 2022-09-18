@@ -41,24 +41,6 @@ namespace ERP_System_Api.Controllers
 
         }
         
-        //[HttpPost("/Register-Admin")]
-        //public async Task<IActionResult> RegisterAdmin([FromBody] UserAuth userAuth)
-        //{
-        //    var response = await _AuthService.RegisterAdmin(userAuth);
-        //    if (response == null)
-        //    {
-        //        throw new Exception("Error en la solicitud");
-        //    }
-        //    return Ok(response);
-        //}
-
-        //[HttpGet("/LogOut")]
-        //public async Task<IActionResult> Logout()
-        //{
-        //    var response = await _AuthService.Logout();
-
-        //    return Ok(response);
-        //}
 
     }
 }

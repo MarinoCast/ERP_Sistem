@@ -1,46 +1,62 @@
 ﻿using ERP_System_Api.DataBase;
 using ERP_System_Api.Helpers.Middleware;
 using ERP_System_Api.Model;
+using ERP_System_Api.Payloads.Request;
+using Microsoft.EntityFrameworkCore;
 
 namespace ERP_System_Api.Services.ServicesImpl
 {
-    public class TestServicesImpl : ICrudServices<Test>
+    public class TestServicesImpl : ICrudServices<Test, TestRequest>
     {
         private readonly DataContext DbSvc;
         private readonly RuleEngine<Test> WEngine;
-
+        private readonly Test test = new Test();
         public TestServicesImpl(DataContext dbSvc, RuleEngine<Test> ruleEngine)
         {
             DbSvc = dbSvc;
             WEngine = ruleEngine;
         }
 
-        public async Task<Test> Create(Test request)
+        public async Task<Test> Create(TestRequest request)
         {
-           var rule = await WEngine.Validate(request);
+            test.name = request.name;
+            DbSvc.Test.AddAsync(test);
+            var create = await DbSvc.SaveChangesAsync();
 
-
-            throw new NotImplementedException();
+            return test;
         }
 
-        public Task<bool> Delete(long id)
-        {
-            throw new NotImplementedException();
-        }
-
+     
         public Task<List<Test>> Get()
         {
-            throw new NotImplementedException();
+            return DbSvc.Test.ToListAsync();
         }
 
-        public Task<Test> GetById(long id)
+        public async Task<Test> GetById(int id)
         {
-            throw new NotImplementedException();
+            return await DbSvc.Test.SingleOrDefaultAsync(x => x.id == id);
+
         }
 
-        public Task<Test> Update(Test request)
+        public async Task<Test> Update(TestRequest request, int id)
         {
-            throw new NotImplementedException();
+            test.name = request.name;
+            test.id = id;
+            
+            DbSvc.Test.Update(test);
+            var updated = await DbSvc.SaveChangesAsync();
+
+            return test;
         }
+        public async Task<bool> Delete(int id)
+        {
+
+            var value = await GetById(id);
+            DbSvc.Test.Remove(value);
+            var delete = await DbSvc.SaveChangesAsync();
+
+            return delete > 0;
+        }
+
     }
 }
