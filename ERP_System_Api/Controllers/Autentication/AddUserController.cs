@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OwlHR.Payloads.Response;
 
-namespace ERP_System_Api.Controllers
+namespace ERP_System_Api.Controllers.Autentication
 {
     public class AddUserController : BaseApiController
     {
@@ -19,7 +19,7 @@ namespace ERP_System_Api.Controllers
         [HttpPost("/CreateUser"), Authorize(Roles = "admin")]
         public async Task<IActionResult> CreateUsers([FromBody] UserAuth userAuth)
         {
-            var defaultEmail = userAuth.UserName + "@owlAgency.com";
+            var defaultEmail = userAuth.UserName + "@elstetic.com";
             var AuthResponse = await AuthSvc.RegisterAsync(defaultEmail, userAuth.UserName, userAuth.Password);
 
             if (AuthResponse.Success)
@@ -34,7 +34,7 @@ namespace ERP_System_Api.Controllers
 
             return Ok(AuthResponse);
         }
-      
+
 
     }
 }

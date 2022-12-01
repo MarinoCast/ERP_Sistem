@@ -13,6 +13,11 @@ namespace ERP_System_Api.DataBase
 
         }
         public DbSet<Test> Test { get; set; }
+        public DbSet<Client> Clients { get; set; }
+        public DbSet<Processing> Processing { get; set; }
+
+        public DbSet<Billing> Billings { get; set; }
+
 
     }
 }

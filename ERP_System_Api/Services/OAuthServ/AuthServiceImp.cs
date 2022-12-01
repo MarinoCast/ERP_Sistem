@@ -65,7 +65,7 @@ namespace ERP_System_Api.Services.OAuthServ
 
             if (!createUser.Succeeded)
             { 
-                throw new Exception("Usuario invalido/ Su nombre   ");
+                throw new Exception("Usuario invalido/ Su nombre");
 
             }
             var Authorize = CreateTokenAsync(newUser);
@@ -93,8 +93,6 @@ namespace ERP_System_Api.Services.OAuthServ
             var user = new IdentityUser
             {
                 UserName = request.UserName,
-                
-
             };
 
             //Creacion del Usuario

@@ -26,20 +26,20 @@ namespace ERP_System_Api.Controllers
             return Ok(reponse);
 
         }
-        [HttpGet("/Get{id}")]
-        public async Task<IActionResult> Get([FromRoute] int id)
-        {
-            var reponse = await TestSvc.GetById(id);
-            if (reponse == null)
-            {
-                throw new Exception();
-            }
-            return Ok(reponse);
+        //[HttpGet("/Get{id}")]
+        //public async Task<IActionResult> Get([FromRoute] int id)
+        //{
+        //    var reponse = await TestSvc.GetById(id);
+        //    if (reponse == null)
+        //    {
+        //        throw new Exception();
+        //    }
+        //    return Ok(reponse);
 
-        }
+        //}
 
         [HttpGet("/GetAll")]
-        public async Task<IActionResult> GetAll([FromRoute] int id)
+        public async Task<IActionResult> GetAll()
         {
             var reponse = await TestSvc.Get();
             if (reponse == null)
@@ -61,17 +61,17 @@ namespace ERP_System_Api.Controllers
             return Ok(reponse);
 
         }
-        [HttpDelete("/Delete{id}")]
-        public async Task<IActionResult> D([FromRoute] int id)
-        {
-            var reponse = await TestSvc.Delete(id);
-            if (!reponse)
-            {
-                throw new Exception();
-            }
-            return Ok(reponse);
+        //[HttpDelete("/DeleteBy{id}")]
+        //public async Task<IActionResult> D([FromRoute] int id)
+        //{
+        //    var reponse = await TestSvc.Delete(id);
+        //    if (!reponse)
+        //    {
+        //        throw new Exception();
+        //    }
+        //    return Ok(reponse);
 
-        }
+        //}
 
     }
 }

@@ -43,7 +43,7 @@ namespace ERP_System_Api.Controllers
             .ToArray();
         }
 
-        [HttpGet("GetEmplo"), Authorize(Roles = "employee")]
+        [HttpGet("GetEmplo"), Authorize(Roles = "employee"), Authorize(Roles = "Supervisor")]
         public IEnumerable<WeatherForecast> getEmplo()
         {
             var rng = new Random();

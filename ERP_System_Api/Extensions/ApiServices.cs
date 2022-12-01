@@ -21,10 +21,16 @@ namespace ERP_System_Api
 
             #region CrudSvc
             services.AddScoped<ICrudServices<Test, TestRequest>, TestServicesImpl>();
+            services.AddScoped<ICrudServices<Client, ClientRequest>, ClientServiceImpl>();
+            services.AddScoped<ICrudServices<Processing, ProcessingsRequest>,ProcessingServiceImpl>();
+            services.AddScoped<ICrudServices<Billing, BillingRequest>, BillingServicesImpl>();
+
             #endregion
 
             #region RuleSvc
             services.AddScoped<RuleEngine<Test>, WorkFlowEngine > ();
+            //services.AddScoped<RuleEngine<Client>, WorkFlowEngine>();
+
             #endregion
 
 
