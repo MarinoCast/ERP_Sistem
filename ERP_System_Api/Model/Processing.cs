@@ -10,6 +10,8 @@ namespace ERP_System_Api.Model
         public string Description { get; set; }
         
         public int Price { get; set; }
+        
+        
 
 
     }
